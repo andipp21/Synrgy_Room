@@ -1,7 +1,8 @@
-package com.example.synrgy_room
+package com.example.synrgy_room.db
 
 import androidx.room.*
 import androidx.room.OnConflictStrategy.REPLACE
+import com.example.synrgy_room.db.Item
 
 @Dao
 interface ItemDao {
