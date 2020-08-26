@@ -7,11 +7,9 @@ import com.example.synrgy_room.R
 import com.example.synrgy_room.db.DatabaseItem
 import com.example.synrgy_room.db.Item
 import kotlinx.android.synthetic.main.activity_edit.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
-class EditActivity : AppCompatActivity() {
-    private lateinit var db: DatabaseItem
+class EditActivity : AppCompatActivity(), EditActivityPresenter.Listener {
+    private lateinit var presenter: EditActivityPresenter
 
     private lateinit var item: Item
 
@@ -20,7 +18,7 @@ class EditActivity : AppCompatActivity() {
         setContentView(R.layout.activity_edit)
 
         DatabaseItem.getInstance(this)?.let {
-            db = it
+            presenter = EditActivityPresenter(it, this)
         }
 
         intent.getParcelableExtra<Item>("item")?.let {
@@ -37,21 +35,21 @@ class EditActivity : AppCompatActivity() {
                 quantity = etQuantityEdit.text.toString().toInt()
             }
 
-            GlobalScope.launch {
-                val rowUpdated = db.itemDao().updateItem(item)
-
-                runOnUiThread {
-                    if(rowUpdated>0){
-                        Toast.makeText(this@EditActivity,"Data Telah Terupdate", Toast.LENGTH_LONG).show()
-                        this@EditActivity.finish()
-                    } else {
-                        Toast.makeText(this@EditActivity,"Data Gagal diupdate", Toast.LENGTH_LONG).show()
-                    }
-                }
-            }
-
-
+            presenter.editItem(item)
         }
 
+    }
+
+    override fun showEditSuccess() {
+        runOnUiThread {
+            Toast.makeText(this@EditActivity,"Data Telah Terupdate", Toast.LENGTH_LONG).show()
+            finish()
+        }
+    }
+
+    override fun showEditFailed() {
+        runOnUiThread {
+            Toast.makeText(this@EditActivity,"Data Gagal diupdate", Toast.LENGTH_LONG).show()
+        }
     }
 }

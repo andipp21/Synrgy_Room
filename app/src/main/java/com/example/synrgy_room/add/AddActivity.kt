@@ -1,41 +1,41 @@
 package com.example.synrgy_room.add
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.example.synrgy_room.R
 import com.example.synrgy_room.db.DatabaseItem
 import com.example.synrgy_room.db.Item
 import kotlinx.android.synthetic.main.activity_add.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
-class AddActivity : AppCompatActivity() {
-    private lateinit var db: DatabaseItem
+class AddActivity : AppCompatActivity(), AddActivityPresenter.Listener {
+    private lateinit var presenter: AddActivityPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add)
 
         DatabaseItem.getInstance(this)?.let {
-            db = it
+            presenter = AddActivityPresenter(it, this)
         }
 
         btnSave.setOnClickListener {
-            val item = Item(null,etName.text.toString(), etQuantity.text.toString().toInt())
+            val item = Item(null, etName.text.toString(), etQuantity.text.toString().toInt())
 
-            GlobalScope.launch {
-                val totalSaved = db.itemDao().addItem(item)
+            presenter.saveItem(item)
+        }
+    }
 
-                runOnUiThread{
-                    if (totalSaved>0){
-                        Toast.makeText(it.context, "Data telah disimpan", Toast.LENGTH_SHORT).show()
-                        finish()
-                    } else {
-                        Toast.makeText(this@AddActivity, "Data gagal disimpan", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
+    override fun showSaveSuccess() {
+        runOnUiThread {
+            Toast.makeText(this, "Data telah disimpan", Toast.LENGTH_SHORT).show()
+            finish()
+        }
+    }
+
+    override fun showSaveFailed() {
+        runOnUiThread {
+            Toast.makeText(this, "Data gagal disimpan", Toast.LENGTH_SHORT).show()
         }
     }
 }

@@ -59,10 +59,15 @@ class MainActivity : AppCompatActivity(), MainActivityPresenter.Listener {
     }
 
     override fun showDeletedSuccess(item: Item) {
-        Toast.makeText(this, "Data ${item.name} Telah dihapus", Toast.LENGTH_LONG).show()
+        runOnUiThread {
+            Toast.makeText(this, "Data ${item.name} Telah dihapus", Toast.LENGTH_LONG).show()
+            presenter.fetchData()
+        }
     }
 
     override fun showDeletedFailed(item: Item) {
-        Toast.makeText(this, "Data ${item.name} Gagal dihapus", Toast.LENGTH_LONG).show()
+        runOnUiThread {
+            Toast.makeText(this, "Data ${item.name} Gagal dihapus", Toast.LENGTH_LONG).show()
+        }
     }
 }
