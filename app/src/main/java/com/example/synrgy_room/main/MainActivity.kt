@@ -2,30 +2,31 @@ package com.example.synrgy_room.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.synrgy_room.DatabaseItem
 import com.example.synrgy_room.ItemAdapter
 import com.example.synrgy_room.R
+import com.example.synrgy_room.add.AddActivity
+import com.example.synrgy_room.db.DatabaseItem
+import com.example.synrgy_room.db.Item
+import com.example.synrgy_room.edit.EditActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var db: DatabaseItem
+class MainActivity : AppCompatActivity(), MainActivityPresenter.Listener {
+
+    private lateinit var presenter: MainActivityPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         DatabaseItem.getInstance(this)?.let {
-            db = it
+            presenter = MainActivityPresenter(it, this)
         }
 
         fabAdd.setOnClickListener {
-            val intentGoToActivityAdd = Intent(this, AddActivity::class.java)
-
-            startActivity(intentGoToActivityAdd)
+            presenter.goToAddActivity()
         }
 
     }
@@ -33,17 +34,35 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        fetchData()
+        presenter.fetchData()
     }
 
-    fun fetchData(){
-        GlobalScope.launch {
-            val listItem = db.itemDao().getAllItem()
-            runOnUiThread{
-                val adapter = ItemAdapter(listItem)
-                rvContainer.layoutManager=LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
-                rvContainer.adapter = adapter
-            }
+    override fun showStudentList(listItem: List<Item>){
+        runOnUiThread{
+            val adapter = ItemAdapter(listItem, presenter)
+            rvContainer.layoutManager=
+                LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
+            rvContainer.adapter = adapter
         }
+    }
+
+    override fun goToAddActivity() {
+        val intentGoToActivityAdd = Intent(this, AddActivity::class.java)
+
+        startActivity(intentGoToActivityAdd)
+    }
+
+    override fun goToEditActivity(item: Item) {
+        val intentGoToActivityEdit = Intent(this, EditActivity::class.java)
+        intentGoToActivityEdit.putExtra("item", item)
+        startActivity(intentGoToActivityEdit)
+    }
+
+    override fun showDeletedSuccess(item: Item) {
+        Toast.makeText(this, "Data ${item.name} Telah dihapus", Toast.LENGTH_LONG).show()
+    }
+
+    override fun showDeletedFailed(item: Item) {
+        Toast.makeText(this, "Data ${item.name} Gagal dihapus", Toast.LENGTH_LONG).show()
     }
 }

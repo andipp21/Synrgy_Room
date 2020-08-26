@@ -3,9 +3,9 @@ package com.example.synrgy_room.add
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import com.example.synrgy_room.DatabaseItem
-import com.example.synrgy_room.Item
 import com.example.synrgy_room.R
+import com.example.synrgy_room.db.DatabaseItem
+import com.example.synrgy_room.db.Item
 import kotlinx.android.synthetic.main.activity_add.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

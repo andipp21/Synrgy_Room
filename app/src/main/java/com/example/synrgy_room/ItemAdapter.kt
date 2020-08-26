@@ -6,14 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.synrgy_room.db.DatabaseItem
+import com.example.synrgy_room.db.Item
 import com.example.synrgy_room.edit.EditActivity
+import com.example.synrgy_room.main.MainActivityPresenter
 import kotlinx.android.synthetic.main.stuff_item.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class ItemAdapter(val listItem: List<Item>): RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
-    private lateinit var db: DatabaseItem
-
+class ItemAdapter(val listItem: List<Item>, val presenter: MainActivityPresenter): RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
 
     }
@@ -31,31 +32,12 @@ class ItemAdapter(val listItem: List<Item>): RecyclerView.Adapter<ItemAdapter.Vi
         holder.itemView.tvName.text = listItem[position].name
         holder.itemView.tvQuantity.text = listItem[position].quantity.toString()
 
-        DatabaseItem.getInstance(holder.itemView.context)?.let {
-            db = it
-        }
-
         holder.itemView.btnHapus.setOnClickListener{
-            GlobalScope.launch {
-                val rowDeleted = db.itemDao().deleteItem(listItem[position])
-                (holder.itemView.context as MainActivity).runOnUiThread {
-                    if (rowDeleted > 0) {
-                        Toast.makeText(holder.itemView.context, "Data ${listItem[position].name} Telah dihapus", Toast.LENGTH_LONG)
-                    } else {
-                        Toast.makeText(holder.itemView.context, "Data ${listItem[position].name} Gagal dihapus", Toast.LENGTH_LONG)
-                    }
-                }
-                (holder.itemView.context as MainActivity).fetchData()
-            }
-
+            presenter.deleteItem(listItem[position])
         }
 
         holder.itemView.btnEdit.setOnClickListener{
-            val intentGoToEdit = Intent(it.context, EditActivity::class.java)
-            intentGoToEdit.putExtra("item", listItem[position])
-
-            it.context.startActivity(intentGoToEdit)
-
+            presenter.goToEditActivity(listItem[position])
         }
     }
 
